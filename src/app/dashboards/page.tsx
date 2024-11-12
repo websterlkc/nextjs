@@ -47,7 +47,7 @@ export default function Dashboard() {
         message: 'API key created successfully',
         type: 'success'
       });
-    } catch {
+    } catch (error) {
       showNotification({
         message: 'Failed to create API key',
         type: 'error'
@@ -152,7 +152,7 @@ export default function Dashboard() {
                 <input
                   type="checkbox"
                   checked={newKeyValues.usage > 0}
-                  onChange={(e) => setNewKeyValues({ 
+                  onChange={() => setNewKeyValues({ 
                     ...newKeyValues, 
                     usage: newKeyValues.usage > 0 ? 0 : 1000 
                   })}
