@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { supabase } from '../connection/supabaseClient';
+import { showNotification } from "../shared/notification";
+import { ApiKeysTable } from "../shared/components/api-keys-table";
+import { type ApiKey } from "../shared/types";
 
 export default function Dashboard() {
-  const [apiKeys, setApiKeys] = useState<{ id: number; name: string; usage: number; key: string }[]>([]);
-  const [editingKey, setEditingKey] = useState<number | null>(null);
-  const [viewingKey, setViewingKey] = useState<number | null>(null);
-  const [editValues, setEditValues] = useState<{ name: string; usage: number; key: string }>({
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newKeyValues, setNewKeyValues] = useState({
     name: '',
     usage: 0,
-    key: '',
   });
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     fetchApiKeys();
@@ -20,59 +19,81 @@ export default function Dashboard() {
 
   async function fetchApiKeys() {
     try {
-      const { data, error } = await supabase.from('api_keys').select('*');
-      // if (error) {
-      //   console.error('Error Fetching API key:', error);
-      // } else {
-        console.log('Fetched API keys:', data);
-        setApiKeys(data || []);
-      // }
+      const response = await fetch('/api/api-keys');
+      const data = await response.json();
+      setApiKeys(data);
     } catch (error) {
-      console.error('Error fetching API keys:', error);
+      showNotification({
+        message: 'Failed to fetch API keys',
+        type: 'error'
+      });
+    }
+  }
+
+  const handleCreate = async () => {
+    try {
+      const response = await fetch('/api/api-keys/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newKeyValues),
+      });
+
+      if (!response.ok) throw new Error('Failed to create API key');
+
+      await fetchApiKeys();
+      setIsModalOpen(false);
+      setNewKeyValues({ name: '', usage: 0 });
+      showNotification({
+        message: 'API key created successfully',
+        type: 'success'
+      });
+    } catch (error) {
+      showNotification({
+        message: 'Failed to create API key',
+        type: 'error'
+      });
     }
   };
 
-  const generateRandomKey = () => {
-    return Array.from({ length: 16 }, () => Math.random().toString(36).charAt(2)).join('');
-  };
+  const handleEdit = async (id: number, values: Partial<ApiKey>) => {
+    try {
+      const response = await fetch(`/api/api-keys/update?id=${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
 
-  const handleCreate = async () => {
-    const newKey = generateRandomKey();
-    const { data, error } = await supabase.from('api_keys').insert([{ name: editValues.name, usage: editValues.usage, key: newKey }]);
+      if (!response.ok) throw new Error('Failed to update API key');
 
-    if (!error) {
-      fetchApiKeys();
-      setIsModalOpen(false);
-      setEditValues({ name: '', usage: 0, key: '' });
+      setApiKeys(apiKeys.map(k => (k.id === id ? { ...k, ...values } : k)));
+      showNotification({
+        message: 'API key updated successfully',
+        type: 'success'
+      });
+    } catch (error) {
+      throw error;
     }
   };
 
   const handleDelete = async (id: number) => {
-    const { error } = await supabase.from('api_keys').delete().eq('id', id);
-    if (error) console.error('Error deleting API key:', error);
-    else setApiKeys(apiKeys.filter(k => k.id !== id));
-  };
+    try {
+      const response = await fetch(`/api/api-keys/delete?id=${id}`, {
+        method: 'POST',
+      });
 
-  const handleEdit = (id: number) => {
-    setEditingKey(id);
-    const keyToEdit = apiKeys.find(k => k.id === id);
-    if (keyToEdit) {
-      setEditValues({ name: keyToEdit.name, usage: keyToEdit.usage, key: keyToEdit.key });
+      if (!response.ok) throw new Error('Failed to delete API key');
+
+      setApiKeys(apiKeys.filter(k => k.id !== id));
+      showNotification({
+        message: 'API key deleted successfully',
+        type: 'info'
+      });
+    } catch (error) {
+      showNotification({
+        message: 'Failed to delete API key',
+        type: 'error'
+      });
     }
-  };
-
-  const handleUpdate = async () => {
-    const { error } = await supabase.from('api_keys').update(editValues).eq('id', editingKey);
-    if (error) console.error('Error updating API key:', error);
-    else {
-      setApiKeys(apiKeys.map(k => (k.id === editingKey ? { ...k, ...editValues } : k)));
-      setEditingKey(null);
-      setEditValues({ name: '', usage: 0, key: '' });
-    }
-  };
-
-  const handleView = (id: number) => {
-    setViewingKey(viewingKey === id ? null : id);
   };
 
   return (
@@ -92,81 +113,36 @@ export default function Dashboard() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">API Keys</h2>
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded"
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             onClick={() => setIsModalOpen(true)}
           >
             + Create Key
           </button>
         </div>
-        <p className="mb-4">The key is used to authenticate your requests to the Research API. To learn more, see the documentation page.</p>
-        <table className="w-full text-left">
-          <thead>
-            <tr>
-              <th className="pb-2 w-1/4">NAME</th>
-              <th className="pb-2 w-1/4">USAGE</th>
-              <th className="pb-2 w-1/4">KEY</th>
-              <th className="pb-2 w-1/4">OPTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {apiKeys.map((keyObj) => (
-              <tr key={keyObj.id} className="border-t">
-                <td className="py-2 w-1/4">
-                  {editingKey === keyObj.id ? (
-                    <input
-                      type="text"
-                      value={editValues.name}
-                      onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
-                      className="bg-transparent border-none w-full"
-                    />
-                  ) : (
-                    keyObj.name
-                  )}
-                </td>
-                <td className="py-2 w-1/4">
-                  {editingKey === keyObj.id ? (
-                    <input
-                      type="number"
-                      value={editValues.usage}
-                      onChange={(e) => setEditValues({ ...editValues, usage: Number(e.target.value) })}
-                      className="bg-transparent border-none w-full"
-                    />
-                  ) : (
-                    keyObj.usage
-                  )}
-                </td>
-                <td className="py-2 w-1/4">
-                  {viewingKey === keyObj.id ? keyObj.key : '****************'}
-                </td>
-                <td className="py-2 w-1/4 flex space-x-2">
-                  {editingKey === keyObj.id ? (
-                    <button className="text-green-500" onClick={handleUpdate}>✔️</button>
-                  ) : (
-                    <>
-                      <button className="text-yellow-500" onClick={() => handleEdit(keyObj.id)}>✏️</button>
-                      <button className="text-blue-500" onClick={() => handleView(keyObj.id)}>
-                        {viewingKey === keyObj.id ? '🙈' : '👁️'}
-                      </button>
-                    </>
-                  )}
-                  <button className="text-red-500" onClick={() => handleDelete(keyObj.id)}>🗑️</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        
+        <p className="mb-4">
+          The key is used to authenticate your requests to the Research API. 
+          To learn more, see the documentation page.
+        </p>
+
+        <ApiKeysTable 
+          apiKeys={apiKeys}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
 
+      {/* Create Key Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-xl font-bold mb-4">Create New API Key</h2>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Key Name</label>
               <input
                 type="text"
-                value={editValues.name}
-                onChange={(e) => setEditValues({ ...editValues, name: e.target.value })}
+                value={newKeyValues.name}
+                onChange={(e) => setNewKeyValues({ ...newKeyValues, name: e.target.value })}
                 className="w-full p-2 border rounded"
                 placeholder="Enter key name"
               />
@@ -175,30 +151,39 @@ export default function Dashboard() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={editValues.usage > 0}
-                  onChange={(e) => setEditValues({ ...editValues, usage: editValues.usage > 0 ? 0 : 1000 })}
+                  checked={newKeyValues.usage > 0}
+                  onChange={(e) => setNewKeyValues({ 
+                    ...newKeyValues, 
+                    usage: newKeyValues.usage > 0 ? 0 : 1000 
+                  })}
                   className="mr-2"
                 />
                 <span>Limit Usage</span>
               </label>
-              {editValues.usage > 0 && (
+              {newKeyValues.usage > 0 && (
                 <input
                   type="number"
-                  value={editValues.usage}
-                  onChange={(e) => setEditValues({ ...editValues, usage: Number(e.target.value) })}
+                  value={newKeyValues.usage}
+                  onChange={(e) => setNewKeyValues({ 
+                    ...newKeyValues, 
+                    usage: Number(e.target.value) 
+                  })}
                   className="w-full p-2 border rounded mt-2"
                 />
               )}
             </div>
             <div className="flex justify-end space-x-2">
               <button
-                className="px-4 py-2 bg-gray-200 rounded"
-                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setNewKeyValues({ name: '', usage: 0 });
+                }}
               >
                 Cancel
               </button>
               <button
-                className="px-4 py-2 bg-blue-500 text-white rounded"
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 onClick={handleCreate}
               >
                 Create
