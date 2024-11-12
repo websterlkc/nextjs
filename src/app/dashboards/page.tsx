@@ -47,7 +47,7 @@ export default function Dashboard() {
         message: 'API key created successfully',
         type: 'success'
       });
-    } catch (error) {
+    } catch {
       showNotification({
         message: 'Failed to create API key',
         type: 'error'
