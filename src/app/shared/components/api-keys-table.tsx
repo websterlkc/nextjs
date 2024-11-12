@@ -33,7 +33,7 @@ export function ApiKeysTable({ apiKeys, onEdit, onDelete }: ApiKeysTableProps) {
       await onEdit(editingKey, editValues);
       setEditingKey(null);
       setEditValues({ name: '', usage: 0 });
-    } catch (error) {
+    } catch {
       showNotification({
         message: 'Failed to update API key',
         type: 'error'
@@ -48,7 +48,7 @@ export function ApiKeysTable({ apiKeys, onEdit, onDelete }: ApiKeysTableProps) {
         message: 'API key copied to clipboard',
         type: 'success'
       });
-    } catch (err) {
+    } catch {
       showNotification({
         message: 'Failed to copy API key',
         type: 'error'

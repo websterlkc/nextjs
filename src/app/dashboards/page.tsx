@@ -22,7 +22,7 @@ export default function Dashboard() {
       const response = await fetch('/api/api-keys');
       const data = await response.json();
       setApiKeys(data);
-    } catch (error) {
+    } catch {
       showNotification({
         message: 'Failed to fetch API keys',
         type: 'error'
@@ -47,7 +47,7 @@ export default function Dashboard() {
         message: 'API key created successfully',
         type: 'success'
       });
-    } catch (error) {
+    } catch {
       showNotification({
         message: 'Failed to create API key',
         type: 'error'
@@ -88,7 +88,7 @@ export default function Dashboard() {
         message: 'API key deleted successfully',
         type: 'info'
       });
-    } catch (error) {
+    } catch {
       showNotification({
         message: 'Failed to delete API key',
         type: 'error'
