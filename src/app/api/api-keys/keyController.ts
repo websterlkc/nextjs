@@ -59,4 +59,26 @@ export class KeyController {
 
     return NextResponse.json({ success: true });
   }
+
+  static async validateKey(apiKey: string) {
+    const { data, error } = await supabase
+      .from('api_keys')
+      .select('*')
+      .eq('key', apiKey)
+      .single();
+    
+    if (error || !data) {
+      return NextResponse.json(
+        { valid: false, message: 'Invalid API key' },
+        { status: 401 }
+      );
+    }
+  
+    return NextResponse.json({
+      valid: true,
+      message: 'Valid API key',
+      usage: data.usage,
+      limit: data.limit || 1000 // Default limit if not specified
+    });
+  }
 } 
