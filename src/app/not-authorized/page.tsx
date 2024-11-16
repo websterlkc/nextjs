@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function NotAuthorizedPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -21,15 +23,15 @@ export default function NotAuthorizedPage() {
           Access Denied
         </h1>
         <p className="text-gray-600 mb-6">
-          You don't have permission to access this page. Please sign in to continue.
+          You don&apos;t have permission to access this page. Please sign in to continue.
         </p>
         <div className="flex justify-center">
-          <a
+          <Link
             href="/"
             className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
           >
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
