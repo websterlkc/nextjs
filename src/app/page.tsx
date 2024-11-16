@@ -1,14 +1,15 @@
 import Image from "next/image";
-import { getServerSession } from "next-auth";
-import GoogleButton from "@/components/GoogleButton";
 import Link from "next/link";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "./api/auth/[...nextauth]/route";
 
 export default async function Home() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
+  
+  console.log("Current session:", session);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] relative">
-      <GoogleButton />
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <Image
           className="dark:invert"
@@ -18,6 +19,7 @@ export default async function Home() {
           height={38}
           priority
         />
+
         <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
           <li className="mb-2">
             Get started by editing{" "}
@@ -45,6 +47,7 @@ export default async function Home() {
             />
             Deploy now
           </a>
+          
           {session && (
             <Link
               href="/dashboards"

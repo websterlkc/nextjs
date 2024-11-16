@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from 'sonner'
 import { Providers } from "./providers"
+import GoogleButton from "@/components/GoogleButton";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,7 +31,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <GoogleButton />
+          {children}
+        </Providers>
         <Toaster 
           position="top-center"
           toastOptions={{

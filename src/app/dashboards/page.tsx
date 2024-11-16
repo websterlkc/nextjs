@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { showNotification } from "../shared/notification";
 import { ApiKeysTable } from "../shared/components/api-keys-table";
 import { type ApiKey } from "../shared/types";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 export default function Dashboard() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -11,6 +13,13 @@ export default function Dashboard() {
   const [newKeyValues, setNewKeyValues] = useState({
     name: '',
     usage: 0,
+  });
+  
+  const { status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      redirect('/');
+    },
   });
 
   useEffect(() => {
@@ -95,6 +104,10 @@ export default function Dashboard() {
       });
     }
   };
+  
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="p-8">
