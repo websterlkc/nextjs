@@ -4,13 +4,6 @@ import { NextResponse } from 'next/server';
 interface User {
   email: string;
   name?: string | null;
-  image?: string | null;
-  created_datetime?: string;
-}
-
-interface UserLogging {
-  id?: string;
-  email: string;
   created_datetime?: string;
 }
 
