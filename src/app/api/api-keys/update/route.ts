@@ -1,4 +1,4 @@
-import { KeyController } from '../keyController';
+import { KeyController } from '@/app/controllers/keyController';
 import { NextRequest } from 'next/server';
 
 export async function POST(request: NextRequest) {
