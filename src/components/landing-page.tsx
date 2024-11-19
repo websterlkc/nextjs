@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check, Github, LineChart, GitPullRequestIcon as PullRequest, Star, Tag } from 'lucide-react'
+import { Check, Github, LineChart, GitPullRequestIcon as PullRequest, Star } from 'lucide-react'
 import GoogleButton from "@/components/GoogleButton"
 import { useSession } from "next-auth/react"
 
