@@ -1,11 +1,33 @@
 'use client';
 
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-export default function GoogleButton() {
+
+interface GoogleButtonProps {
+  showOnPath?: string[];  // paths where button should be shown
+  hideOnPath?: string[];  // paths where button should be hidden
+}
+
+export default function GoogleButton({ showOnPath, hideOnPath }: GoogleButtonProps) {
   const { data: session } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Visibility logic
+  const shouldShow = () => {
+    if (showOnPath && !showOnPath.includes(pathname)) {
+      return false;
+    }
+    if (hideOnPath && hideOnPath.includes(pathname)) {
+      return false;
+    }
+    return true;
+  };
+
+  if (!shouldShow()) {
+    return null;
+  }
 
   const handleSignOut = async () => {
     try {
@@ -30,32 +52,32 @@ export default function GoogleButton() {
   };
 
   return (
-    <div className="absolute top-4 right-4 flex items-center gap-4 z-50">
+    <div className="flex items-center">
       {session ? (
-        <>
+        <div className="flex items-center gap-2">
           {session.user?.image && (
-            <div className="relative w-10 h-10 rounded-full overflow-hidden">
+            <div className="relative w-6 h-6 rounded-full overflow-hidden">
               <Image
                 src={session.user.image}
                 alt="Profile"
-                width={40}
-                height={40}
+                width={24}
+                height={24}
                 className="object-cover"
               />
             </div>
           )}
           <button
             onClick={handleSignOut}
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm h-10 px-4"
+            className="text-sm font-medium hover:underline underline-offset-4"
           >
             Sign Out
           </button>
-        </>
+        </div>
       ) : (
         <button
           onClick={handleSignIn}
           type="button"
-          className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm h-10 px-4 cursor-pointer"
+          className="text-sm font-medium hover:underline underline-offset-4"
         >
           Sign in with Google
         </button>

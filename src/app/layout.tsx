@@ -32,7 +32,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <GoogleButton />
+          <div className="fixed top-4 right-4">
+            <GoogleButton hideOnPath={['/']} />
+          </div>
           {children}
         </Providers>
         <Toaster 
