@@ -70,18 +70,23 @@ export class KeyController {
   }
 
   static async validateKey(apiKey: string) {
-    const response = await fetch('/api/keys/validate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ apiKey }),
-    });
+    try {
+      const response = await fetch('/api/keys/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ apiKey }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Validation error:', error);
+      throw new Error('Failed to validate API key');
     }
-
-    return response.json();
   }
 } 
