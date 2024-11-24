@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       limit: data.limit || 1000
     });
     
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to validate API key' },
       { status: 500 }

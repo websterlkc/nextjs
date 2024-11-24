@@ -14,10 +14,10 @@ export async function GET() {
     if (error) throw error;
     return NextResponse.json(data);
     
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
-      { error: 'Unauthorized access' },
-      { status: 401 }
+      { error: 'Failed to fetch API keys' },
+      { status: 500 }
     );
   }
 }
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (error) throw error;
     return NextResponse.json(data[0]);
     
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to create API key' },
       { status: 500 }
