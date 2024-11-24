@@ -5,9 +5,16 @@ import { KeyController } from '../controllers/keyController';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '../shared/sidebar';
 
+interface ValidationResult {
+  valid: boolean;
+  message: string;
+  usage?: number;
+  limit?: number;
+}
+
 export default function ValidateKey() {
   const [apiKey, setApiKey] = useState('');
-  const [validationResult, setValidationResult] = useState<any>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -23,7 +30,7 @@ export default function ValidateKey() {
           router.push('/protected');
         }, 1500); // 1.5 second delay to show success message
       }
-    } catch (err) {
+    } catch {
       setError('Failed to validate API key');
       setValidationResult(null);
     }
