@@ -33,7 +33,7 @@ export async function PUT(
     if (error) throw error;
     return NextResponse.json({ success: true });
     
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to update API key' },
       { status: 500 }
@@ -71,7 +71,7 @@ export async function DELETE(
     if (error) throw error;
     return NextResponse.json({ success: true });
     
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to delete API key' },
       { status: 500 }

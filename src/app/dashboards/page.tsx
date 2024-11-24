@@ -31,7 +31,7 @@ export default function Dashboard() {
     try {
       const data = await KeyController.getAllKeys();
       setApiKeys(data);
-    } catch (_error) {
+    } catch {
       showNotification({
         message: 'Failed to fetch API keys',
         type: 'error'
@@ -70,7 +70,7 @@ export default function Dashboard() {
         message: 'API key updated successfully',
         type: 'success'
       });
-    } catch (_error) {
+    } catch {
       showNotification({
         message: 'Failed to update API key',
         type: 'error'

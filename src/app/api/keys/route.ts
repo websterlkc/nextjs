@@ -14,7 +14,7 @@ export async function GET() {
     if (error) throw error;
     return NextResponse.json(data);
     
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch API keys' },
       { status: 500 }
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (error) throw error;
     return NextResponse.json(data[0]);
     
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to create API key' },
       { status: 500 }
