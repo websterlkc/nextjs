@@ -1,84 +1,87 @@
-import { supabase } from '@/app/connection/supabaseClient';
-import { NextResponse } from 'next/server';
 import { ApiKey } from '@/app/shared/types';
 
 export class KeyController {
   static async getAllKeys() {
-    const { data, error } = await supabase
-      .from('api_keys')
-      .select('*');
-    
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    const response = await fetch('/api/keys', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Important for sending session cookie
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
-    return NextResponse.json(data);
+
+    return response.json();
   }
 
   static async createKey(request: Request) {
     const body = await request.json();
-    const { name, usage } = body;
     
-    const key = Array.from({ length: 16 }, () => 
-      Math.random().toString(36).charAt(2)).join('');
-    
-    const { data, error } = await supabase
-      .from('api_keys')
-      .insert([{ name, usage, key }])
-      .select();
-    
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    const response = await fetch('/api/keys', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
-    return NextResponse.json(data[0]);
+
+    return response.json();
   }
 
   static async updateKey(id: string, data: Partial<ApiKey>) {
-    const { error } = await supabase
-      .from('api_keys')
-      .update(data)
-      .eq('id', id);
+    const response = await fetch(`/api/keys/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return NextResponse.json({ success: true });
+    return response.json();
   }
 
   static async deleteKey(id: string) {
-    const { error } = await supabase
-      .from('api_keys')
-      .delete()
-      .eq('id', id);
+    const response = await fetch(`/api/keys/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return NextResponse.json({ success: true });
+    return response.json();
   }
 
   static async validateKey(apiKey: string) {
-    const { data, error } = await supabase
-      .from('api_keys')
-      .select('*')
-      .eq('key', apiKey)
-      .single();
-    
-    if (error || !data) {
-      return NextResponse.json(
-        { valid: false, message: 'Invalid API key' },
-        { status: 401 }
-      );
-    }
-  
-    return NextResponse.json({
-      valid: true,
-      message: 'Valid API key',
-      usage: data.usage,
-      limit: data.limit || 1000 // Default limit if not specified
+    const response = await fetch('/api/keys/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ apiKey }),
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
   }
 } 

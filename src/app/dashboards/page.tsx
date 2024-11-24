@@ -6,6 +6,7 @@ import { ApiKeysTable } from "../shared/components/api-keys-table";
 import { type ApiKey } from "../shared/types";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import { KeyController } from "../controllers/keyController";
 
 export default function Dashboard() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -28,10 +29,9 @@ export default function Dashboard() {
 
   async function fetchApiKeys() {
     try {
-      const response = await fetch('/api/api-keys');
-      const data = await response.json();
+      const data = await KeyController.getAllKeys();
       setApiKeys(data);
-    } catch {
+    } catch (error) {
       showNotification({
         message: 'Failed to fetch API keys',
         type: 'error'
@@ -41,14 +41,12 @@ export default function Dashboard() {
 
   const handleCreate = async () => {
     try {
-      const response = await fetch('/api/api-keys/create', {
+      const request = new Request('/api/keys', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newKeyValues),
+        body: JSON.stringify(newKeyValues)
       });
-
-      if (!response.ok) throw new Error('Failed to create API key');
-
+      
+      await KeyController.createKey(request);
       await fetchApiKeys();
       setIsModalOpen(false);
       setNewKeyValues({ name: '', usage: 0 });
@@ -66,32 +64,23 @@ export default function Dashboard() {
 
   const handleEdit = async (id: number, values: Partial<ApiKey>) => {
     try {
-      const response = await fetch(`/api/api-keys/update?id=${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) throw new Error('Failed to update API key');
-
+      await KeyController.updateKey(id.toString(), values);
       setApiKeys(apiKeys.map(k => (k.id === id ? { ...k, ...values } : k)));
       showNotification({
         message: 'API key updated successfully',
         type: 'success'
       });
     } catch (error) {
-      throw error;
+      showNotification({
+        message: 'Failed to update API key',
+        type: 'error'
+      });
     }
   };
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/api/api-keys/delete?id=${id}`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete API key');
-
+      await KeyController.deleteKey(id.toString());
       setApiKeys(apiKeys.filter(k => k.id !== id));
       showNotification({
         message: 'API key deleted successfully',

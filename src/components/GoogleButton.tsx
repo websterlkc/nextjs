@@ -79,7 +79,7 @@ export default function GoogleButton({ showOnPath, hideOnPath }: GoogleButtonPro
           type="button"
           className="text-sm font-medium hover:underline underline-offset-4"
         >
-          Sign in with Google
+          Sign in
         </button>
       )}
     </div>

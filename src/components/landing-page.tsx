@@ -36,7 +36,7 @@ export default function LandingPage() {
                 href="/dashboards"
                 className="text-sm font-medium hover:underline underline-offset-4"
               >
-                Manage API Keys
+                Dashboard
               </Link>
             )}
           <div className="flex items-center">
