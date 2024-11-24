@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/app/connection/supabaseClient';
 import { getAuthenticatedUserId } from '@/app/utils/auth';
 
+// Updated type definition for route params
+type RouteParams = { params: { id: string } }
+
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteParams  // Changed to use the correct type
 ) {
   try {
     const userId = await getAuthenticatedUserId();
@@ -14,7 +17,7 @@ export async function PUT(
     const { data: keyData } = await supabase
       .from('api_keys')
       .select('user_id')
-      .eq('id', params.id)
+      .eq('id', context.params.id)  // Using context.params
       .single();
       
     if (!keyData || keyData.user_id !== userId) {
@@ -27,7 +30,7 @@ export async function PUT(
     const { error } = await supabase
       .from('api_keys')
       .update(body)
-      .eq('id', params.id)
+      .eq('id', context.params.id)  // Using context.params
       .eq('user_id', userId);
       
     if (error) throw error;
@@ -43,7 +46,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteParams  // Changed to use the correct type
 ) {
   try {
     const userId = await getAuthenticatedUserId();
@@ -52,7 +55,7 @@ export async function DELETE(
     const { data: keyData } = await supabase
       .from('api_keys')
       .select('user_id')
-      .eq('id', params.id)
+      .eq('id', context.params.id)  // Using context.params
       .single();
       
     if (!keyData || keyData.user_id !== userId) {
@@ -65,7 +68,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('api_keys')
       .delete()
-      .eq('id', params.id)
+      .eq('id', context.params.id)  // Using context.params
       .eq('user_id', userId);
       
     if (error) throw error;
