@@ -1,0 +1,5 @@
+build website: 
+  image: node
+  scripts: 
+    - npm intall
+    - npm build
